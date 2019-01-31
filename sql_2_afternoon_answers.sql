@@ -143,3 +143,116 @@ AND Composer=null;
 
 --GROUP BY
 
+SELECT COUNT(*), g.Name 
+FROM Track t
+JOIN Genre g 
+ON t.GenreId=g.GenreId
+GROUP BY g.Name;
+
+SELECT COUNT(*), g.name
+FROM Track t
+JOIN Genre g 
+ON t.GenreId=g.GenreId
+WHERE g.Name = 'Pop' OR g.Name='Rock' 
+GROUP BY g.Name ;
+
+SELECT a.name, COUNT(*)
+FROM Album al
+JOIN Artist a
+ON al.ArtistId=a.ArtistId
+GROUP BY a.Name ;
+
+
+--USE DISTINCT
+
+SELECT DISTINCT composer
+FROM Track;
+
+SELECT DISTINCT BillingPostalCode
+FROM Invoice;
+
+SELECT DISTINCT Company
+FROM Customer;
+
+
+--DELETE
+
+DELETE FROM practice_delete
+WHERE type='bronze';
+
+DELETE FROM practice_delete
+WHERE type='silver';
+
+DELETE FROM practice_delete
+WHERE value=150;
+
+
+--ECOMMERCE SIMULATION
+
+CREATE TABLE users(
+  u_key SERIAL PRIMARY KEY,
+  u_name text,
+  email text
+);
+
+CREATE TABLE product(
+  p_key SERIAL PRIMARY KEY,
+  p_name text,
+  price integer
+);
+
+CREATE TABLE orders(
+  o_key SERIAL PRIMARY KEY,
+  o_number integer,
+  u_key integer REFERENCES users(u_key),
+  p_key integer REFERENCES product(p_key)
+);
+
+INSERT INTO users(u_name, email)
+VALUES
+('Billy', 'billyboy@bmail.com'),
+('Shelly', 'shellybelly@dbomail.com'),
+('Chad', 'thegreateste@ball.com');
+
+INSERT INTO product(p_name, price)
+VALUES
+('A Rock', 3),
+('Pencil Nubbin', 20),
+('ABC Gum', 80);
+
+INSERT INTO orders(o_number, u_key, p_key)
+VALUES
+(1, (SELECT u_key FROM users WHERE u_name='Billy'), (SELECT p_key FROM product WHERE p_key=1)),
+(1, (SELECT u_key FROM users WHERE u_name='Billy'), (SELECT p_key FROM product WHERE p_key=2)),
+(1, (SELECT u_key FROM users WHERE u_name='Billy'), (SELECT p_key FROM product WHERE p_key=3)),
+
+(2, (SELECT u_key FROM users WHERE u_name='Shelly'), (SELECT p_key FROM product WHERE p_key=1)),
+(2, (SELECT u_key FROM users WHERE u_name='Shelly'), (SELECT p_key FROM product WHERE p_key=2)),
+
+(3, (SELECT u_key FROM users WHERE u_name='Chad'), (SELECT p_key FROM product WHERE p_key=3)),
+(3, (SELECT u_key FROM users WHERE u_name='Chad'), (SELECT p_key FROM product WHERE p_key=3)),
+(3, (SELECT u_key FROM users WHERE u_name='Chad'), (SELECT p_key FROM product WHERE p_key=3)),
+(3, (SELECT u_key FROM users WHERE u_name='Chad'), (SELECT p_key FROM product WHERE p_key=2));
+
+SELECT p_name 
+FROM product p
+JOIN orders o
+ON o.p_key=p.p_key
+WHERE o_number=1;
+
+SELECT * FROM orders;
+
+SELECT SUM(price)
+FROM product
+WHERE p_key IN(
+  SELECT p_key from orders WHERE o_number=1)
+
+SELECT *
+FROM orders
+WHERE u_key IN(
+  SELECT u_key from users WHERE u_name='Chad')
+
+SELECT COUNT (DISTINCT o_number)
+FROM orders
+WHERE u_key IN(
+  SELECT u_key from users WHERE u_name='Chad')
